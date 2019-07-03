@@ -18,13 +18,13 @@ sudo sysctl vm.swappiness=1
 
 # https://www.thegeekdiary.com/centos-rhel-7-how-to-disable-transparent-huge-pages-thp/
 cat /sys/kernel/mm/transparent_hugepage/enabled
-vi /etc/default/grub
+sudo vi /etc/default/grub # GRUB_CMDLINE_LINUX 옵션의 맨 뒤에 transparent_hugepage=never 내용 추가
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 # sudo reboot
 cat /proc/cmdline
 
 # http://gurukaybee.blogspot.com/2017/05/rhel7-install-nscd-name-service-cache.html
-sudo yum install nscd
+sudo yum install nscd -y
 sudo systemctl start nscd
 sudo systemctl status nscd
 
@@ -32,13 +32,13 @@ sudo systemctl status nscd
 # https://www.manualfactory.net/10147
 sudo systemctl stop chronyd
 sudo systemctl disable chronyd
-sudo yum install ntp
+sudo yum install ntp -y
 sudo systemctl start ntpd
 sudo systemctl enable ntpd
 
 # https://linuxhint.com/disable_ipv6_centos7/
 ip a | grep inet6
-sudo vi /etc/default/grub
+sudo vi /etc/default/grub # GRUB_CMDLINE_LINUX 옵션의 맨 앞에 ipv6.disable=1 내용 추가
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 # sudo reboot
 ip a | grep inet6 # 아무것도 안나오면 성공
