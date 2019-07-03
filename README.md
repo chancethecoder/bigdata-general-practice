@@ -17,8 +17,7 @@ sudo systemctl isolate runlevel3.target
 3. disable SELinux
 ```bash
 # https://www.lesstif.com/pages/viewpage.action?pageId=6979732
-sudo vi /etc/sysconfig/selinux
-# SELINUX=disabled
+sudo vi /etc/sysconfig/selinux # SELINUX=disabled 수정
 ```
 4. disable firewall
 ```bash
@@ -30,7 +29,6 @@ sudo systemctl disable firewalld
 ```bash
 # https://askubuntu.com/questions/103915/how-do-i-configure-swappiness
 cat /proc/sys/vm/swappiness
-# sudo sysctl vm.swappiness=1
 sudo vi /etc/sysctl.conf # vm.swappiness=1 추가
 ```
 6. disable transparent hugepage support permanently
@@ -39,8 +37,8 @@ sudo vi /etc/sysctl.conf # vm.swappiness=1 추가
 cat /sys/kernel/mm/transparent_hugepage/enabled
 sudo vi /etc/default/grub # transparent_hugepage=never 내용 추가
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
-# sudo reboot
-cat /proc/cmdline
+sudo reboot
+cat /proc/cmdline # 
 ```
 7. check to see that nscd service is running
 ```bash
@@ -110,15 +108,13 @@ sudo reboot
 
 ## Install CM
 
-### Install JDK 1.8
+### Install JDK 1.8 (All nodes)
 
 1. install jdk
 ```bash
-sudo yum install wget -y
-
 # Installing the JDK Manually
 # https://www.cloudera.com/documentation/enterprise/5-15-x/topics/cdh_ig_jdk_installation.html#topic_29_1
-# jdk를 local 다운로드 받아서 CM node에 복사
+# jdk를 local 다운로드 받아서 각 노드에 복사
 sudo mkdir -p /usr/java
 sudo tar xvfz /home/centos/jdk-8u202-linux-x64.tar.gz -C /usr/java/
 ```
@@ -219,11 +215,13 @@ sudo mysql_secure_installation
 # 5. Y
 # 6. Y
 ```
-4. install the MySQL JDBC Driver for MariaDB
+4. install the MySQL JDBC Driver for MariaDB (All nodes)
 ```bash
+# https://www.cloudera.com/documentation/enterprise/5-15-x/topics/install_cm_mariadb.html
+# https://dev.mysql.com/downloads/connector/j/5.1.html에서 파일 다운로드 후 각 노드에 복사
 sudo mkdir -p /usr/share/java/
-# sudo cp mariadb-java-client-2.4.2-javadoc.jar /usr/share/java/mysql-connector-java.jar
-sudo cp mysql-connector-java-5.1.47.jar /usr/share/java/mysql-connector-java.jar
+tar xvf mysql-connector-java-5.1.47.tar.gz
+sudo cp mysql-connector-java-5.1.47/mysql-connector-java-5.1.47.jar /usr/share/java/mysql-connector-java.jar
 sudo ls /usr/share/java/
 ```
 5. create Databases for Cloudera Software
@@ -267,3 +265,26 @@ SHOW GRANTS FOR 'hive'@'%';
 ```
 
 ### Start CM
+
+1. preparing the Cloudera Manager Server Database
+```bash
+sudo /usr/share/cmf/schema/scm_prepare_database.sh mysql scm scm
+sudo rm /etc/cloudera-scm-server/db.mgmt.properties
+```
+2. start Cloudera Manager Server
+```bash
+sudo systemctl start cloudera-scm-server
+```
+3. observe the startup process
+```bash
+sudo tail -f /var/log/cloudera-scm-server/cloudera-scm-server.log
+
+# 아래 로그가 보인다면 성공
+# INFO WebServerImpl:com.cloudera.server.cmf.WebServerImpl: Started Jetty server.
+```
+4. in a web browser, go to http://<server_host>:7180
+
+### CM configuration
+
+1. 역할 할당 사용자 지정하기
+2. 데이터베이스 설정 - 호스트, 데이터베이스, 유저, 패스워드 입력 - 테스트 연결
