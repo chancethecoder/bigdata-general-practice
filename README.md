@@ -374,3 +374,24 @@ sudo systemctl restart cloudera-scm-server
 7. Spark2, HDFS, Hive, Zookeeper 선택
 8. 진행 계속
 
+## Test out Cluster
+
+1. create user “training” in linux (All nodes)
+```bash
+sudo su
+adduser training
+usermod -aG wheel training
+exit
+sudo su training
+groups
+# training wheel -> wheel 추가 확인
+```
+2. create user “training” in hdfs
+```bash
+su hdfs
+hdfs dfs -mkdir /user/training
+hdfs dfs -chown training:training /user/training
+hdfs dfs -ls /user
+```
+3. create the sample tables that will be used for the rest of the test
+내일 이어서 하자.
