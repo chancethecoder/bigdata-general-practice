@@ -110,6 +110,8 @@ sudo reboot
 
 ## Install CM
 
+### Install JDK 1.8
+
 1. install jdk
 ```bash
 sudo yum install wget -y
@@ -117,12 +119,151 @@ sudo yum install wget -y
 # Installing the JDK Manually
 # https://www.cloudera.com/documentation/enterprise/5-15-x/topics/cdh_ig_jdk_installation.html#topic_29_1
 # jdk를 local 다운로드 받아서 CM node에 복사
-sudo mkdir /usr/lib/java
-sudo tar xvfz /home/centos/jdk-8u202-linux-x64.tar.gz -C /usr/lib/java/
-
+sudo mkdir -p /usr/java
+sudo tar xvfz /home/centos/jdk-8u202-linux-x64.tar.gz -C /usr/java/
+```
+2. setup java path
+```bash
 # JAVA 경로 지정
-sudo vi /etc/profile
-export JAVA_HOME=/usr/lib/java/jdk1.8.0_202
+sudo vi /etc/profile # export JAVA_HOME=/usr/java/jdk1.8.0_202 추가
 source /etc/profile
 env | grep JAVA_HOME
+# JAVA_HOME 출력되면 성공
 ```
+
+### Install Database
+
+1. install mariadb server
+```bash
+# https://www.cloudera.com/documentation/enterprise/latest/topics/install_cm_mariadb.html
+# https://linuxize.com/post/install-mariadb-on-centos-7/
+# mariadb install
+sudo yum install mariadb-server
+sudo systemctl stop mariadb
+
+ll /var/lib/mysql/
+sudo rm -f /var/lib/mysql/ib_logfile*
+```
+2. configura mariadb server
+```bash
+sudo vi /etc/my.cnf
+```
+```conf
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+transaction-isolation = READ-COMMITTED
+# Disabling symbolic-links is recommended to prevent assorted security risks;
+# to do so, uncomment this line:
+symbolic-links = 0
+# Settings user and group are ignored when systemd is used.
+# If you need to run mysqld under a different user or group,
+# customize your systemd unit file for mariadb according to the
+# instructions in http://fedoraproject.org/wiki/Systemd
+
+key_buffer = 16M
+key_buffer_size = 32M
+max_allowed_packet = 32M
+thread_stack = 256K
+thread_cache_size = 64
+query_cache_limit = 8M
+query_cache_size = 64M
+query_cache_type = 1
+
+max_connections = 550
+#expire_logs_days = 10
+#max_binlog_size = 100M
+
+#log_bin should be on a disk with enough free space.
+#Replace '/var/lib/mysql/mysql_binary_log' with an appropriate path for your
+#system and chown the specified folder to the mysql user.
+log_bin=/var/lib/mysql/mysql_binary_log
+
+#In later versions of MariaDB, if you enable the binary log and do not set
+#a server_id, MariaDB will not start. The server_id must be unique within
+#the replicating group.
+server_id=1
+
+binlog_format = mixed
+
+read_buffer_size = 2M
+read_rnd_buffer_size = 16M
+sort_buffer_size = 8M
+join_buffer_size = 8M
+
+# InnoDB settings
+innodb_file_per_table = 1
+innodb_flush_log_at_trx_commit  = 2
+innodb_log_buffer_size = 64M
+innodb_buffer_pool_size = 4G
+innodb_thread_concurrency = 8
+innodb_flush_method = O_DIRECT
+innodb_log_file_size = 512M
+
+[mysqld_safe]
+log-error=/var/log/mariadb/mariadb.log
+pid-file=/var/run/mariadb/mariadb.pid
+```
+3. start mariadb and setup mariadb secure
+```bash
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo systemctl status mariadb
+sudo mysql_secure_installation
+
+# 순서대로 입력
+# 1. enter
+# 2. Y, root 패스워드
+# 3. Y
+# 4. N
+# 5. Y
+# 6. Y
+```
+4. install the MySQL JDBC Driver for MariaDB
+```bash
+sudo mkdir -p /usr/share/java/
+# sudo cp mariadb-java-client-2.4.2-javadoc.jar /usr/share/java/mysql-connector-java.jar
+sudo cp mysql-connector-java-5.1.47.jar /usr/share/java/mysql-connector-java.jar
+sudo ls /usr/share/java/
+```
+5. create Databases for Cloudera Software
+```bash
+mysql -u root -p
+```
+```sql
+-- services
+-- Cloudera Manager Server	scm	scm
+-- Activity Monitor	amon	amon
+-- Reports Manager	rman	rman
+-- Hue	hue	hue
+-- Hive Metastore Server	metastore	hive
+-- Sentry Server	sentry	sentry
+-- Cloudera Navigator Audit Server	nav	nav
+-- Cloudera Navigator Metadata Server	navms	navms
+-- Oozie	oozie	oozie
+
+CREATE DATABASE scm DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE amon DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE rman DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE hue DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE metastore DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE sentry DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE nav DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE navms DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE oozie DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+
+GRANT ALL ON scm.* TO 'scm'@'%' IDENTIFIED BY 'scm';
+GRANT ALL ON amon.* TO 'amon'@'%' IDENTIFIED BY 'amon';
+GRANT ALL ON rman.* TO 'rman'@'%' IDENTIFIED BY 'rman';
+GRANT ALL ON hue.* TO 'hue'@'%' IDENTIFIED BY 'hue';
+GRANT ALL ON metastore.* TO 'hive'@'%' IDENTIFIED BY 'hive';
+GRANT ALL ON sentry.* TO 'sentry'@'%' IDENTIFIED BY 'sentry';
+GRANT ALL ON nav.* TO 'nav'@'%' IDENTIFIED BY 'nav';
+GRANT ALL ON navms.* TO 'navms'@'%' IDENTIFIED BY 'navms';
+GRANT ALL ON oozie.* TO 'oozie'@'%' IDENTIFIED BY 'oozie';
+
+SHOW DATABASES;
+SHOW GRANTS FOR 'hive'@'%';
+```
+
+### Start CM
