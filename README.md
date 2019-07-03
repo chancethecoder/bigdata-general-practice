@@ -8,64 +8,55 @@
 ```bash
 sudo yum update -y
 ```
-2. change the run level to multi-user text mode
+2. change the run level to multi-user text mode [(참고문서)](https://askubuntu.com/questions/900985/how-can-i-simply-change-into-a-text-mode-runlevel-under-systemd)
 ```bash
-# https://askubuntu.com/questions/900985/how-can-i-simply-change-into-a-text-mode-runlevel-under-systemd
 sudo systemctl isolate multi-user.target
 sudo systemctl isolate runlevel3.target
 ```
-3. disable SELinux
+3. disable SELinux [(참고문서)](https://www.lesstif.com/pages/viewpage.action?pageId=6979732)
 ```bash
-# https://www.lesstif.com/pages/viewpage.action?pageId=6979732
 sudo vi /etc/sysconfig/selinux # SELINUX=disabled 수정
 ```
-4. disable firewall
+4. disable firewall [(참고문서)](https://linuxize.com/post/how-to-stop-and-disable-firewalld-on-centos-7/)
 ```bash
-# https://linuxize.com/post/how-to-stop-and-disable-firewalld-on-centos-7/
 sudo systemctl stop firewalld
 sudo systemctl disable firewalld
 ```
-5. check vm.swappiness and update permanently as necessary.
+5. check vm.swappiness and update permanently as necessary. [(참고문서)](https://askubuntu.com/questions/103915/how-do-i-configure-swappiness)
 ```bash
-# https://askubuntu.com/questions/103915/how-do-i-configure-swappiness
 cat /proc/sys/vm/swappiness
 sudo vi /etc/sysctl.conf # vm.swappiness=1 추가
 ```
-6. disable transparent hugepage support permanently
+6. disable transparent hugepage support permanently [(참고문서)](https://www.thegeekdiary.com/centos-rhel-7-how-to-disable-transparent-huge-pages-thp/)
 ```bash
-# https://www.thegeekdiary.com/centos-rhel-7-how-to-disable-transparent-huge-pages-thp/
 cat /sys/kernel/mm/transparent_hugepage/enabled
 sudo vi /etc/default/grub # transparent_hugepage=never 내용 추가
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 sudo reboot
 cat /proc/cmdline # 
 ```
-7. check to see that nscd service is running
+7. check to see that nscd service is running [(참고문서)](http://gurukaybee.blogspot.com/2017/05/rhel7-install-nscd-name-service-cache.html)
 ```bash
-# http://gurukaybee.blogspot.com/2017/05/rhel7-install-nscd-name-service-cache.html
 sudo yum install nscd -y
 sudo systemctl start nscd
 sudo systemctl enable nscd
 sudo systemctl status nscd
 ```
-8. check to see that ntp service is running (disable chrony as necessary)
+8. check to see that ntp service is running (disable chrony as necessary) [(참고문서)](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/s1-disabling_chrony)
 ```bash
-# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/s1-disabling_chrony
-# https://www.manualfactory.net/10147
 sudo systemctl stop chronyd
 sudo systemctl disable chronyd
 sudo yum install ntp -y
 sudo systemctl start ntpd
 sudo systemctl enable ntpd
 ```
-9. disable IPV6
+9. disable IPV6 [(참고문서)](https://linuxhint.com/disable_ipv6_centos7/)
 ```bash
-# https://linuxhint.com/disable_ipv6_centos7/
-ip a | grep inet6
+ip addr | grep inet6
 sudo vi /etc/default/grub # ipv6.disable=1 내용 추가
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 # sudo reboot
-ip a | grep inet6 # 아무것도 안나오면 성공
+ip addr | grep inet6 # 아무것도 안나오면 성공
 ```
 10. setup a private/public key
 ```bash
@@ -97,23 +88,26 @@ chmod 600 .ssh/id*
 # 각 노드 hostname 변경
 sudo vi /etc/hostname
 sudo reboot
-
-# 각 노드 known host에 다른 노드 추가
-# ssh centos@h1
-# ssh centos@h2
-# ssh centos@h3
-# ssh centos@h4
-# ssh centos@h5
+```
+13. add known hosts
+```bash
+# 각 노드에서 다른 노드 ssh 실행
+ssh centos@h1
+ssh centos@h2
+ssh centos@h3
+ssh centos@h4
+ssh centos@h5
 ```
 
 ## Install CM
 
 ### Install JDK 1.8 (All nodes)
 
+[참고문서](https://www.cloudera.com/documentation/enterprise/5-15-x/topics/cdh_ig_jdk_installation.html#topic_29_1)
+
 1. install jdk
 ```bash
 # Installing the JDK Manually
-# https://www.cloudera.com/documentation/enterprise/5-15-x/topics/cdh_ig_jdk_installation.html#topic_29_1
 # jdk를 local 다운로드 받아서 각 노드에 복사
 sudo mkdir -p /usr/java
 sudo tar xvfz /home/centos/jdk-8u202-linux-x64.tar.gz -C /usr/java/
@@ -129,9 +123,10 @@ env | grep JAVA_HOME
 
 ### Install Database
 
+[참고문서](https://www.cloudera.com/documentation/enterprise/5-15-x/topics/install_cm_mariadb.html)
+
 1. install mariadb server
 ```bash
-# https://www.cloudera.com/documentation/enterprise/latest/topics/install_cm_mariadb.html
 # https://linuxize.com/post/install-mariadb-on-centos-7/
 # mariadb install
 sudo yum install mariadb-server
@@ -217,7 +212,6 @@ sudo mysql_secure_installation
 ```
 4. install the MySQL JDBC Driver for MariaDB (All nodes)
 ```bash
-# https://www.cloudera.com/documentation/enterprise/5-15-x/topics/install_cm_mariadb.html
 # https://dev.mysql.com/downloads/connector/j/5.1.html에서 파일 다운로드 후 각 노드에 복사
 sudo mkdir -p /usr/share/java/
 tar xvf mysql-connector-java-5.1.47.tar.gz
@@ -264,12 +258,45 @@ SHOW DATABASES;
 SHOW GRANTS FOR 'hive'@'%';
 ```
 
+### Install CM
+
+[참고문서](https://www.cloudera.com/documentation/enterprise/5-15-x/topics/install_cm_server.html)
+
+1. download repository
+```bash
+sudo wget https://archive.cloudera.com/cm5/redhat/7/x86_64/cm/cloudera-manager.repo -P /etc/yum.repos.d/
+vi /etc/yum.repos.d/cloudera-manager.repo
+# baseurl 에 주소를 5.15.2 로 변경
+# 실수로 변경 안한 상태로 yum 명령어를 실행했다면, 아래와 같이 캐시 삭제 필요
+# rm -rf /var/cache/yum/*
+# yum repolist
+sudo rpm --import https://archive.cloudera.com/cm5/redhat/7/x86_64/cm/RPN-GPG-KEY-cloudera
+```
+2. install CM master server
+```bash
+sudo yum install cloudera-manager-daemons cloudera-manager-server
+```
+3. install CM agent
+```bash
+sudo yum install cloudera-manager-daemons cloudera-manager-agent
+```
+4. configure the Cloudera Manager Agent to point to the Cloudera Manager Server
+```bash
+sudo vi /etc/cloudera-scm-agent/config.ini
+# server_host, server_port: CM Server 노드 정보 입력
+```
+4. start CM agent
+```bash
+sudo systemctl start cloudera-scm-agent
+```
+
 ### Start CM
+
+[참고문서](https://www.cloudera.com/documentation/enterprise/5-15-x/topics/install_software_cm_wizard.html)
 
 1. preparing the Cloudera Manager Server Database
 ```bash
 sudo /usr/share/cmf/schema/scm_prepare_database.sh mysql scm scm
-sudo rm /etc/cloudera-scm-server/db.mgmt.properties
 ```
 2. start Cloudera Manager Server
 ```bash
@@ -288,8 +315,9 @@ sudo tail -f /var/log/cloudera-scm-server/cloudera-scm-server.log
 
 ### Wizard
 1. 로그인: admin/admin
-2. 역할 할당 사용자 지정하기
-3. 데이터베이스 설정 - 호스트, 데이터베이스, 유저, 패스워드 입력 - 테스트 연결
+2. 패키지: impala 패키지 선택, **spark 패키지 제외 - 추후 커스텀 설정 후 설치 필요함**
+3. 역할 할당 사용자 지정하기 [(참고문서)](https://www.cloudera.com/documentation/enterprise/5-15-x/topics/cm_ig_host_allocations.html#host_role_assignments)
+4. 데이터베이스 설정 - 호스트, 데이터베이스, 유저, 패스워드 입력 - 테스트 연결: CM에서 각 서비스의 패키지 설치를 위한 설정
 
 ### Install Sqoop
 
@@ -313,4 +341,36 @@ sudo tail -f /var/log/cloudera-scm-server/cloudera-scm-server.log
 5. Add Service로 이동
 6. Kafka Broker 설치: 모든 데이터 노드
 7. 옵션 설정은 전부 default로 진행
+
+### Install Spark
+
+*주의*: CM에서 spark 바로 설치하면 1.6버전이 설치됨. 2.x 설치하려면 아래를 진행해야한다.
+
+* [참고문서](https://www.cloudera.com/documentation/spark2/latest/topics/spark2.html)
+* [requirements](https://www.cloudera.com/documentation/spark2/latest/topics/spark2_requirements.html#requirements)
+
+1. scala 2.11 이상 설치: 모든 노드
+```bash
+cd
+wget http://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.rpm
+sudo yum install scala-2.11.8.rpm -y
+```
+2. parcels > configuration > remote parcel [(참고문서)](https://www.cloudera.com/documentation/spark2/latest/topics/spark2_packaging.html)
+3. 파일 다운로드
+```bash
+cd /opt/cloudera/csd
+wget http://archive.cloudera.com/spark2/csd/SPARK2_ON_YARN-2.4.0.cloudera2.jar
+```
+4. csd 파일 권한 변경 [(참고문서)](https://www.cloudera.com/documentation/spark2/latest/topics/spark2_installing.html)
+```bash
+chown cloudera-scm:cloudera-scm SPARK2_ON_YARN-2.4.0.cloudera2.jar
+chmod 644 SPARK2_ON_YARN-2.4.0.cloudera2.jar
+```
+5. CM 서비스 재시작
+```bash
+sudo systemctl restart cloudera-scm-server
+```
+6. Add Service - 스파크
+7. Spark2, HDFS, Hive, Zookeeper 선택
+8. 진행 계속
 
