@@ -286,5 +286,31 @@ sudo tail -f /var/log/cloudera-scm-server/cloudera-scm-server.log
 
 ### CM configuration
 
-1. 역할 할당 사용자 지정하기
-2. 데이터베이스 설정 - 호스트, 데이터베이스, 유저, 패스워드 입력 - 테스트 연결
+### Wizard
+1. 로그인: admin/admin
+2. 역할 할당 사용자 지정하기
+3. 데이터베이스 설정 - 호스트, 데이터베이스, 유저, 패스워드 입력 - 테스트 연결
+
+### Install Sqoop
+
+1. Add Service로 이동
+2. Sqoop1 패키지 선택 (Sqoop2는 deprecated 될 가능성 있음)
+3. Gateway: 모든 노드
+
+### Install Impala
+
+1. Add Service로 이동
+2. statestore: CM 노드
+3. metastore: CM 노드
+4. impalad: 모든 데이터 노드
+
+### Install Kafka
+
+1. parcel로 이동 (우상단 선물 그림 아이콘)
+2. KAFKA Download 버튼 클릭
+3. Distribute 버튼 클릭
+4. Activate 버튼 클릭
+5. Add Service로 이동
+6. Kafka Broker 설치: 모든 데이터 노드
+7. 옵션 설정은 전부 default로 진행
+
