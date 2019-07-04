@@ -1,6 +1,4 @@
-# Yelp Restaurants Big Data Analysis
-
-## Uploading Data to HDFS For Storage and Analysis
+# Uploading Data to HDFS For Storage and Analysis
 
 1. upload data to hdfs
 ```bash
@@ -19,15 +17,41 @@ hdfs dfs -put users.json /user/training/yelp/users
 hdfs dfs -put tip.json /user/training/yelp/tip
 hdfs dfs -put checkin.json /user/training/yelp/checkin
 ```
-2. download SerDe jar
-```bash
-wget -O json-serde-1.3.8-jar-with-dependencies.jar \ www.congiu.net/hive-json-serde/1.3.8/cdh5/json-serde-1.3.8-jar-with-dependencies.jar
-wget -O json-udf-1.3.8-jar-with-dependencies.jar \ www.congiu.net/hive-json-serde/1.3.8/cdh5/json-udf-1.3.8-jar-with-dependencies.jar
+
+# Hive SerDe library Configuration
+
+1. download jar file
+```
+wget -O json-serde-1.3.8-jar-with-dependencies.jar  \
+www.congiu.net/hive-json-serde/1.3.8/cdh5/json-serde-1.3.8-jar-with-dependencies.jar
+
+wget -O json-udf-1.3.8-jar-with-dependencies.jar  \
+www.congiu.net/hive-json-serde/1.3.8/cdh5/json-udf-1.3.8-jar-with-dependencies.jar
+
+ln -s /opt/cloudera/parcels/CDH-5.15.2-1.cdh5.15.2.p0.3/lib/hive /usr/lib/hive
+sudo cp *.jar /usr/lib/hive
+```
+2. deploy jar file
+```text
+#외부 Jar 등록
+1. In the Cloudera Manager Admin Console, go to the Hive service.
+2. Click the Configuration tab.
+3. Under Filters, click "Hive (Service-Wide)" scope.
+4. Click the Advanced category.
+5. In the panel on the right, locate the "Hive Service Advanced Configuration Snippet (Safety Value) for hive-site.xml", click the plus sign (+) to the right of it, and enter the following information:
+6. In the Name field, enter the "hive.reloadable.aux.jars.path" property.
+7. In the Value field, enter the path "/usr/lib/hive/lib/json-serde-1.3.8-jar-with-dependencies.jar, /usr/lib/hive/lib/json-udf-1.3.8-jar-with-dependencies.jar" where you copied the JAR file to in Step 1.
+8. In the Description field, enter the property description. For example, Path to Hive UDF JAR files.
+9. Click Save Changes.
+10. Redeploy the Hive client configuration. In the Cloudera Manager Admin Console, go to the Hive service.
+From the Actions menu at the top right of the service page, select Deploy Client Configuration.
+Click "Deploy Client Configuration".
+11. Restart the Hive service.
 ```
 
-## Creating Tables in HIVE
+# Creating Tables in HIVE
 
-### Create Restaurants Table
+## Create Restaurants Table
 
 1. add jars
 ```sql
@@ -235,7 +259,7 @@ L'Amore Italian Restaurant	AZ	Phoenix	true
 Julia Baker Confections	AZ	Phoenix	true
 ```
 
-### Create Review Table
+## Create Review Table
 
 1. Create Review Table
 ```sql
@@ -278,7 +302,7 @@ SELECT count(*) FROM review_filtered;
 3221419
 ```
 
-### Create Users Table
+## Create Users Table
 
 1. Create Users Table
 ```sql
@@ -329,7 +353,7 @@ AS
 SELECT * FROM users LATERAL VIEW explode(elite) c AS elite_year;
 ```
 
-### Create Tip Table
+## Create Tip Table
 
 1. Create Tip Table
 ```sql
@@ -343,4 +367,4 @@ ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe' STORED AS TEXTFILE
 LOCATION '/user/mboldin/yelp/tip';
 ```
 
-## Create tables and queries using HiveQL and visualize in Hue (or Tableau if you want to try)
+# Create tables and queries using HiveQL and visualize in Hue (or Tableau if you want to try)
