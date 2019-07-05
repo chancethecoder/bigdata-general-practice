@@ -6,6 +6,9 @@
     group by state;
     ```
 
+    ![](https://github.com/chancethecoder/bigdata-general-practice/blob/master/assets/picture1.png)
+
+
 2. Which Cities Have The Highest Number Of Restaurants?
 
     ```sql
