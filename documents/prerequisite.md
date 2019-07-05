@@ -316,6 +316,13 @@ sudo tail -f /var/log/cloudera-scm-server/cloudera-scm-server.log
 3. 역할 할당 사용자 지정하기 [(참고문서)](https://www.cloudera.com/documentation/enterprise/5-15-x/topics/cm_ig_host_allocations.html#host_role_assignments)
 4. 데이터베이스 설정 - 호스트, 데이터베이스, 유저, 패스워드 입력 - 테스트 연결: CM에서 각 서비스의 패키지 설치를 위한 설정
 
+### Parcel 설치 방법
+
+1. parcel로 이동 (우상단 선물 그림 아이콘)
+2. 해당 패키지에서 Download 버튼 클릭
+3. Distribute 버튼 클릭
+4. Activate 버튼 클릭
+
 ## Setup Sqoop
 
 1. Add Service로 이동
@@ -325,16 +332,13 @@ sudo tail -f /var/log/cloudera-scm-server/cloudera-scm-server.log
 ## Setup Impala
 
 1. Add Service로 이동
-2. statestore: CM 노드
-3. metastore: CM 노드
-4. impalad: 모든 데이터 노드
+2. 역할 선택 -> statestore: CM 노드, metastore: CM 노드, impalad: 모든 데이터 노드
+3. Hue 서비스 > 구성으로 이동
+4. Impala 서비스 none -> Impala 선택 후 변경 내용 저장
+5. 서비스 재시작
 
 ## Setup Kafka
 
-1. parcel로 이동 (우상단 선물 그림 아이콘)
-2. KAFKA Download 버튼 클릭
-3. Distribute 버튼 클릭
-4. Activate 버튼 클릭
 5. Add Service로 이동
 6. Kafka Broker 설치: 모든 데이터 노드
 7. 옵션 설정은 전부 default로 진행
