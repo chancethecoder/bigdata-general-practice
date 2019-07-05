@@ -32,6 +32,12 @@
 
 4. Distribution of ratings vs categories
 
+    ```sql
+    with t as (select stars, category
+        from restaurants3 lateral view explode(categories) tbl as category)
+    select * from t;
+    ```
+
 5. What ratings do the majority of restaurants have?
 
 6. Rating distribution in restaurant reviews
@@ -49,7 +55,7 @@
         ```sql
         with t as (select v.stars, r.categories
             from review3 v join restaurants2 r on v.business_id = r.business_id
-            where v.stars < 3),
+            where v.stars > 3),
         t1 as (select category, count(*) as cnt
             from t lateral view explode(categories) tbl as category
             group by category)
@@ -61,7 +67,7 @@
         ```sql
         with t as (select v.stars, r.categories
             from review3 v join restaurants2 r on v.business_id = r.business_id
-            where v.stars > 3),
+            where v.stars < 3),
         t1 as (select category, count(*) as cnt
             from t lateral view explode(categories) tbl as category
             group by category)
@@ -69,4 +75,12 @@
         ```
 
 8. Which restaurants have the most reviews?
+
+    ```sql
+    with t as (select r.name, count(*) as cnt
+        from review3 v join restaurants3 r on v.business_id = r.business_id
+        group by r.name)
+    select * from t;
+    ```
+
 9. What number of yelp users are elite? Do they rate differently than non -elite users
