@@ -2,7 +2,7 @@
 
     ```sql
     select state,sum(is_open) as cnt
-    from restaurants2
+    from restaurants
     group by state;
     ```
 
@@ -12,7 +12,7 @@
 2. Which Cities Have The Highest Number Of Restaurants?
 
     ```sql
-    select city, count(*) as cnt from restaurants2
+    select city, count(*) as cnt from restaurants
     group by city;
     ```
 
@@ -20,7 +20,7 @@
 
     ```sql
     with t as (select business_id,category
-    from restaurants2 lateral view explode(categories) tbl as category),
+    from restaurants lateral view explode(categories) tbl as category),
     t2 as (select category, count(*) as cnt
         from t
         group by category)
@@ -34,7 +34,7 @@
 
     ```sql
     with t as (select stars, category
-        from restaurants3 lateral view explode(categories) tbl as category)
+        from restaurants lateral view explode(categories) tbl as category)
     select * from t;
     ```
 
@@ -44,7 +44,7 @@
 
     ```sql
     select stars, count(*) as cnt
-    from review2
+    from review
     group by stars;
     ```
 
@@ -54,7 +54,7 @@
 
         ```sql
         with t as (select v.stars, r.categories
-            from review3 v join restaurants2 r on v.business_id = r.business_id
+            from review v join restaurants r on v.business_id = r.business_id
             where v.stars > 3),
         t1 as (select category, count(*) as cnt
             from t lateral view explode(categories) tbl as category
@@ -66,7 +66,7 @@
 
         ```sql
         with t as (select v.stars, r.categories
-            from review3 v join restaurants2 r on v.business_id = r.business_id
+            from review v join restaurants r on v.business_id = r.business_id
             where v.stars < 3),
         t1 as (select category, count(*) as cnt
             from t lateral view explode(categories) tbl as category
@@ -78,7 +78,7 @@
 
     ```sql
     with t as (select r.name, count(*) as cnt
-        from review3 v join restaurants3 r on v.business_id = r.business_id
+        from review v join restaurants r on v.business_id = r.business_id
         group by r.name)
     select * from t;
     ```
