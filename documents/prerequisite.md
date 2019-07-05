@@ -363,20 +363,22 @@ Cloudera Manager 및 클러스터 설치 과정입니다.
 3. 역할 할당 사용자 지정하기 [(참고문서)](https://www.cloudera.com/documentation/enterprise/5-15-x/topics/cm_ig_host_allocations.html#host_role_assignments)
 4. 데이터베이스 설정 - 호스트, 데이터베이스, 유저, 패스워드 입력 - 테스트 연결: CM에서 각 서비스의 패키지 설치를 위한 설정
 
-### Parcel 설치 방법
+## Setup Services
+
+*주의*: Parcel로 설치 시 아래 참고
 
 1. parcel로 이동 (우상단 선물 그림 아이콘)
 2. 해당 패키지에서 Download 버튼 클릭
 3. Distribute 버튼 클릭
 4. Activate 버튼 클릭
 
-## Setup Sqoop
+### Sqoop
 
 1. Add Service로 이동
 2. Sqoop1 패키지 선택 (Sqoop2는 deprecated 될 가능성 있음)
 3. Gateway: 모든 노드
 
-## Setup Impala
+### Impala
 
 1. Add Service로 이동
 2. 역할 선택 -> statestore: CM 노드, metastore: CM 노드, impalad: 모든 데이터 노드
@@ -384,13 +386,14 @@ Cloudera Manager 및 클러스터 설치 과정입니다.
 4. Impala 서비스 none -> Impala 선택 후 변경 내용 저장
 5. 서비스 재시작
 
-## Setup Kafka
+### Kafka
 
-5. Add Service로 이동
-6. Kafka Broker 설치: 모든 데이터 노드
-7. 옵션 설정은 전부 default로 진행
+1. Parcel로 설치, Activate까지 진행
+2. Add Service로 이동
+3. Kafka Broker 설치: 모든 데이터 노드
+4. 옵션 설정은 전부 default로 진행
 
-## Setup Spark
+### Spark2
 
 *주의*: CM에서 spark 바로 설치하면 1.6버전이 설치됨. 2.x 설치하려면 아래를 진행해야한다.
 
@@ -430,7 +433,7 @@ Cloudera Manager 및 클러스터 설치 과정입니다.
 7. Spark2, HDFS, Hive, Zookeeper 선택
 8. 진행 계속
 
-## Setup Zeppelin
+### Zeppelin
 
 다음 문서 참고 - [(참고문서)](https://github.com/evonit/zeppelin-cloudera)
 
