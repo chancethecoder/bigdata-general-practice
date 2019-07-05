@@ -38,6 +38,19 @@
     df2.coalesce(1).write.format("parquet").save("tmpbusiness")
     ```
 
+    ```python
+    # pyspark
+    f = sc.textFile("/user/training/yelp2/business/business.json") \
+            .map(lambda l: l.replace("soy-free", "soy_free")) \
+            .map(lambda l: l.replace("gluten-free","gluten_free")) \
+            .map(lambda l: l.replace("dairy-free","dairy_free"))
+    f.saveAsTextFile("/user/training/yelp2/business2")
+    df = spark.read.json("/user/training/yelp2/business2")
+    df.printSchema()
+
+    df.write.parquet("/user/training/yelp2/business_parquet")
+    ```
+
 4. Hue에서 Impala 테이블 생성
 
     ```sql
